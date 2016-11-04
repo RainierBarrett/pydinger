@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 test_pydinger
@@ -9,6 +8,7 @@ Tests for `pydinger` module.
 """
 
 
+from __future__ import division
 import sys
 import unittest
 from contextlib import contextmanager
@@ -20,15 +20,6 @@ from pydinger import cli
 
 
 class TestPydinger(unittest.TestCase):
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-    def test_000_something(self):
-        pass
 
     def test_command_line_interface(self):
         runner = CliRunner()
