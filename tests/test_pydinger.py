@@ -17,8 +17,6 @@ from click.testing import CliRunner
 from pydinger import pydinger
 from pydinger import cli
 
-
-
 class TestPydinger(unittest.TestCase):
 
     def test_command_line_interface(self):

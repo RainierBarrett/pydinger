@@ -1,3 +1,6 @@
+import numpy as np
+import numpy.polynomial.legendre as L
+
 class Grid:
     '''This class is a grid implementation for holding our input data'''
     def __init__(self, axes, values):
