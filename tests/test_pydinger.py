@@ -30,8 +30,8 @@ class TestPydinger(unittest.TestCase):
         assert help_result.exit_code == 0
         assert '--help  Show this message and exit.' in help_result.output
 
-    def test_read_energy_1D(self):
-        '''this tests to make sure we can read in a 1D potential file'''
+    def test_read_file_1D(self):
+        '''This tests to make sure we can read in a 1D potential file correctly.'''
         testfile = '1D_test.txt'
         potentials = pydinger.read_file(testfile, 1)
         assert potentials.dim == 1
@@ -39,3 +39,19 @@ class TestPydinger(unittest.TestCase):
         assert potentials.axes[0][0] - 0.000100 < 0.000001
         assert potentials.axes[0][199] - 1.990000 < 0.000001
         print(potentials.values[0])
+
+    def test_read_file_2D(self):
+        '''This tests to make sure we can read in a 2D potential file correctly.'''
+        #Do I even need this???
+        testfile = '2D_test.txt'
+        potentials = pydinger.read_file(testfile, 2)
+        assert potentials.dim == 2
+        assert len(potentials.axes[0]) == 121
+        assert potentials.axes[0][0] - 0.000100 < 0.000001
+        assert potentials.axes[0][120] - 2.0001 < 0.000001
+        assert potentials.axes[1][0] - 0.000100 < 0.000001
+        assert potentials.axes[1][120] - 2.0001 < 0.000001
+        assert len(potentials.values) == 121
+        assert potentials.values[0] - 0.00014142135623730951 < 0.000001
+        assert potentials.values[60] - 1.4143549837293323 <  0.000001
+        assert potentials.values[120] - 2.8285685461024275 <  0.000001

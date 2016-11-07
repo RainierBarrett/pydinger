@@ -13,5 +13,5 @@ def read_file(filename, dim):
             words = line.split(' ')
             for i in range(dim):
                 coords[i].append(float(words[i]))
-            values.append(float(words[dim]))
+            values.append(float(words[dim]))#this makes a big long potentials list for higher dims
     return(Grid(coords, values))
