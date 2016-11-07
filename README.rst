@@ -6,9 +6,7 @@ pydinger
            :target: https://travis-ci.org/RainierBarrett/pydinger
 
 .. image:: https://coveralls.io/repos/github/RainierBarrett/pydinger/badge.svg?branch=master
-	   :target: https://coveralls.io/github/RainierBarrett/pydinger?branch=master
-
-
+	   :target: https://coveralls.io/repos/github/RainierBarrett/pydinger/badge.svg?branch=master
 
 
 This is a program to solve Schroedinger's equation written in Python.
