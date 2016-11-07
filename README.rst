@@ -10,6 +10,7 @@ pydinger
 
 
 
+
 This is a program to solve Schroedinger's equation written in Python.
 
 
