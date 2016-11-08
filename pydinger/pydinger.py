@@ -6,7 +6,7 @@ class Grid:
     def __init__(self, axis, values):
         self.coefficients = []#holds our basis set coefficients later
         self.axis = np.array(axis)
-        self.values = np.array(values)
+        self.pot_table = np.array(values)
         self.c = 1.0#this is the constant used in the Hamiltonian
         self.fourier = True#use Fourier series by default
         self.N = 50#a fairly accurate number

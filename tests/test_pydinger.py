@@ -83,8 +83,6 @@ class TestPydinger(unittest.TestCase):
         potentials = pydinger.read_input(testfile)
         test_wavefunc = potentials.axis*2 + potentials.axis**2 - potentials.axis**3
         potentials.get_coefficients(test_wavefunc)
-        print("length of potentials.coefficients is {}".format(len(potentials.coefficients)))
-        print("and potentials.N is {}".format(potentials.N))
         assert len(potentials.coefficients) == potentials.N
         values = potentials.get_values( test_wavefunc )
         assert len(values) == len(potentials.axis)
@@ -92,3 +90,4 @@ class TestPydinger(unittest.TestCase):
         for i in range(len(values)):
             diffsquare +=(values[i] - test_wavefunc[i])**2
         assert(diffsquare < 0.05)#that should be pretty accurate
+
