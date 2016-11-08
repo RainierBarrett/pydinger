@@ -12,7 +12,6 @@ deploy:
 env:
 - TOXENV=py34
 - TOXENV=py27
-- TOXENV=pypy
 install:
 - pip install -U tox
 - pip install -r requirements_dev.txt
