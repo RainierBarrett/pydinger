@@ -29,10 +29,16 @@ class Grid:
         '''This will dispatch to the appropriate coefficients getter function based on which basis set we're using.'''
         if(self.fourier == True):
             self.get_fourier_coefficients( func )
+        elif(self.fourier == False):
+            self.get_lagrange_coefficients( func )
+
+    def get_lagrange_coefficients(self, func):
+        '''This returns the actual Lagrange-polynomial coefficient values for our function, up to N.'''
+        self.coefficients = L.legfit(self.axis, func, self.N -1)
 
     def cn(self, func, n):
         '''This calculates the nth Fourier coefficient, using a function represented by a numpy array called 'func'. This is a Riemann sum approximation of the integral we would use, and proves pretty accurate.'''
-        c = func * np.exp(-1j*2*n*np.pi*func/self.period)
+        c = func * np.exp(-1j*2*n*np.pi*self.axis/self.period)
         return(c.sum()/c.size)
     
     def f(self, func, x):
@@ -45,12 +51,24 @@ class Grid:
         for i in range(self.N):
             self.coefficients.append(self.cn(func, i))
 
+    def get_values(self, func):
+        '''This dispatches to the correct get_values function based on which basis we choose.'''
+        if(self.fourier == True):
+            return(self.get_fourier_values( func ))
+        elif(self.fourier == False):
+            return(self.get_lagrange_values())
+            
     def get_fourier_values(self, func):
         '''This will return a numpy array of values at each point on an axis corresponding to our Fourier coefficients found with get_fourier_coefficients().'''
         values = np.array([self.f(func, x).real for x in self.axis])
         return(values)
 
-def read_file(filename, dim = 1):#1D by default
+    def get_lagrange_values(self):
+        '''This returns a numpy array of values at each point on the axis corresponding to our Lagrange polynomial values found with get_lagrange_coefficients().'''
+        values = np.array(L.legval(self.axis, self.coefficients))
+        return(values)
+
+def read_file(filename):
     coords = [] 
     values = []
     with open(filename) as f:
