@@ -54,7 +54,8 @@ class TestPydinger(unittest.TestCase):
         assert potentials.N == 100
         assert potentials.v - 2.0 < 0.000001
         assert potentials.fourier == True
-
+        for i in range(len(potentials.axis)):
+            assert (potentials.wavefunc[i] - (potentials.axis[i]**4 - potentials.axis[i]**2) < 0.000001)
         testfile = 'legendre_test_input.txt'
         potentials = pydinger.read_input(testfile)
         assert len(potentials.axis) == 200
@@ -64,6 +65,8 @@ class TestPydinger(unittest.TestCase):
         assert potentials.c - 1.5 < 0.000001
         assert potentials.N == 10
         assert potentials.fourier == False
+        for i in range(len(potentials.axis)):
+            assert (potentials.wavefunc[i] - (potentials.axis[i]**4 - potentials.axis[i]**2) < 0.000001)
 
             
     def test_get_coeffs_fourier(self):

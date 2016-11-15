@@ -13,6 +13,7 @@ class Grid:
         self.period = abs(self.axis[0] - self.axis[len(self.axis)-1])#treat as if it's periodic
         self.offset = self.axis[0]#the offset for plotting to use
         self.hmat = []
+        self.wavefunc = []
 
     def set_c(self, new_c):
         '''For setting the new constant in the operator.'''
@@ -29,6 +30,12 @@ class Grid:
     def set_basis(self, new_bool):
         '''For choosing which basis set to use.'''
         self.fourier = new_bool
+
+    def set_wavefunc(self, func):
+        '''Takes in a function of x as a python-formatted string. For example, "2*x + np.cos(x*np.pi)" would work. Evaluates the function on the axis of the grid and stores it as a numpy array.'''
+        for x in self.axis:
+            self.wavefunc.append(eval(func))
+        self.wavefunc = np.array(self.wavefunc)
 
     def get_coefficients(self, func):
         '''This will dispatch to the appropriate coefficients getter function based on which basis set we're using.'''
@@ -81,7 +88,7 @@ class Grid:
             self.get_hmat_fourier()
 
     def get_hmat_fourier(self):
-        '''This constructs the Hamiltonian matrix for the Fourier basis set. Conveniently diagonal due to the nature of the Fourier series.'''
+        '''This constructs the Hamiltonian matrix for the Fourier basis set. Conveniently diagonal due to the nature of the Fourier series. Should only ever be called once per run.'''
         for i in range(self.N):
             self.hmat.append([0 for i in range(self.N)])
         for i in range(self.N):
@@ -98,7 +105,7 @@ class Grid:
             self.apply_H_legendre()
 
     def apply_H_legendre(self):
-        '''This applies the Hamiltonian operator, utilizing a builtin capability of the numpy.polynomial.legendre module to get the second derivatives.'''
+        '''This applies the Hamiltonian operator, utilizing a builtin capability of the numpy.polynomial.legendre module to get the second derivatives. Note that we have to "pad" the coefficients array with two zeros after taking the second derivative.'''
         #taking del^2 has never been easier!
         new_coefficients = L.legder(self.coefficients, 2)
         new_coefficients = list(new_coefficients)
@@ -113,9 +120,10 @@ class Grid:
         #this does the matrix multiplication we need:
         new_coefficients = np.dot(self.hmat, self.coefficients)
         #due to the way I have stored my hamiltonian matrix, I have to do the V adding here:
-        self.coefficients = (new_coefficients*(-self.c) + self.v*self.coefficients)
+        self.coefficients = (new_coefficients*(-self.c) + self.v*self.coefficients*2*self.period)
             
 def read_file(filename):
+    '''This reads in a file containing the x-axis for our wavefunction.'''
     coords = [] 
     with open(filename) as f:
         for line in f:
@@ -124,6 +132,7 @@ def read_file(filename):
     return(Grid(coords))
 
 def read_input(filename = 'fourier_test_input.txt'):
+    '''This reads an input file with our chosen formatting.'''
     with open(filename) as f:
         for line in f:
             if('TARGET' in line):
@@ -141,5 +150,8 @@ def read_input(filename = 'fourier_test_input.txt'):
             elif('POTENTIAL' in line):
                 pot = float(line.split(' ')[1])
                 grid.set_v(pot)
+            elif('FUNCTION' in line):
+                func = line.split("'")[1]
+                grid.set_wavefunc(func)
     return(grid)
             #still will need to edit this later to also take in a wavefunction
