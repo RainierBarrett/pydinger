@@ -92,7 +92,7 @@ class Grid:
         for i in range(self.N):
             self.hmat.append([0 for i in range(self.N)])
         for i in range(self.N):
-            self.hmat[i][i] = self.coefficients[i]*(-4* (i**2) * ((np.pi)**2) / self.period)
+            self.hmat[i][i] = (-4* (i**2) * ((np.pi)**2) / self.period)
             self.hmat = np.array(self.hmat)
 
 
