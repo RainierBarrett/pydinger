@@ -3,12 +3,12 @@ import numpy.polynomial.legendre as L
 
 class Grid:
     '''This class is a grid implementation for holding our input data'''
-    def __init__(self, axis):
+    def __init__(self, axis, fourier = True):
         self.coefficients = []#holds our basis set coefficients later
         self.axis = np.array(axis)
-        self.v0 = 0
+        self.v = 0.0
         self.c = 1.0#this is the constant used in the Hamiltonian
-        self.fourier = True#use Fourier series by default
+        self.fourier = fourier#use Fourier series by default
         self.N = 50#a fairly accurate number
         self.period = abs(self.axis[0] - self.axis[len(self.axis)-1])#treat as if it's periodic
         self.hmat = []
@@ -99,9 +99,9 @@ class Grid:
     def apply_H(self):
         '''This applies the Hamiltonian operator, dispatching to the appropriate system.'''
         if(self.fourier == True):
-            self.apply_H_fourier()
+            return(self.apply_H_fourier())
         elif(self.fourier == False):
-            self.apply_H_legendre()
+            return(self.apply_H_legendre())
 
     def apply_H_legendre(self):
         '''This applies the Hamiltonian operator, utilizing a builtin capability of the numpy.polynomial.legendre module to get the second derivatives. Note that we have to "pad" the coefficients array with two zeros after taking the second derivative.'''
@@ -111,15 +111,24 @@ class Grid:
         for i in range(2):
             new_coefficients.append(0)
         new_coefficients = np.array(new_coefficients)#what a pain!
-        self.coefficients = new_coefficients*(-self.c) + self.v * self.coefficients
+        return(np.array(new_coefficients*(-self.c) + self.v * self.coefficients))
         
 
     def apply_H_fourier(self):
         '''This applies the Hamiltonian operator to our coefficient list in the Fourier basis.'''
         #this does the matrix multiplication we need:
         new_coefficients = np.dot(self.hmat, self.coefficients)
-        #due to the way I have stored my hamiltonian matrix, I have to do the V adding here:
-        self.coefficients = (new_coefficients*(-self.c) + self.v*self.coefficients*2*self.period)
+        #due to the way I have stored my hamiltonian matrix, I do the V adding here
+        #it's the same as applying the 'actual' hamiltonian matrix
+        return(new_coefficients*(-self.c) + self.v*self.coefficients*2*self.period)
+
+    def get_energy(self):
+        '''This uses the current basis set coefficients and result of taking the hamiltonian to calculate the energy of the "wavefunction".'''
+        #fill with 1s if we're not fitting a given wavefunction.
+        if len(self.coefficients) == 0:
+            self.coefficients = np.ones(self.N)
+        return(np.dot(self.coefficients, self.apply_H()))
+        
             
 def read_file(filename):
     '''This reads in a file containing the x-axis for our wavefunction.'''
@@ -149,7 +158,7 @@ def read_input(filename = 'fourier_test_input.txt'):
             elif('POTENTIAL' in line):
                 pot = float(line.split(' ')[1])
                 grid.set_v(pot)
-            elif('FUNCTION' in line):
+            elif('FUNCTION' in line):#no longer needed but keep for posterity
                 func = line.split("'")[1]
                 grid.set_wavefunc(func)
     return(grid)
