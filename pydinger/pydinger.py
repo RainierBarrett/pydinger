@@ -13,6 +13,7 @@ class Grid:
         self.period = abs(self.axis[0] - self.axis[len(self.axis)-1])#treat as if it's periodic
         self.hmat = []
         self.wavefunc = []
+        self.changes = [0 for i in range(len(axis))]#start with all changes being 0
 
     def set_c(self, new_c):
         '''For setting the new constant in the operator.'''
@@ -94,8 +95,6 @@ class Grid:
             self.hmat[i][i] = (-4* (i**2) * ((np.pi)**2) / self.period)
             self.hmat = np.array(self.hmat)
 
-
-
     def apply_H(self):
         '''This applies the Hamiltonian operator, dispatching to the appropriate system.'''
         if(self.fourier == True):
@@ -127,8 +126,33 @@ class Grid:
         #fill with 1s if we're not fitting a given wavefunction.
         if len(self.coefficients) == 0:
             self.coefficients = np.ones(self.N)
-        return(np.dot(self.coefficients, self.apply_H()))
-        
+        return((np.dot(self.coefficients, self.apply_H()))/np.dot(self.coefficients, self.coefficients))#this is the inner product identity of expectation of the hamiltonian
+
+    def get_additions(self, testing = False):
+        '''This checks whether we need to increase each basis set coefficient to promote a decrease in energy. This doesn't actually do the changing of the coefficients, only finds which ones should increase.'''
+        for i in range(self.N):
+            e1 = self.get_energy()
+            diff = 0.05 * self.coefficients[i]
+            self.coefficients[i] += diff
+            e2 = self.get_energy()
+            if testing and e1 > e2:
+                print("ADDING:: e1: {}, e2:{}".format(e1,e2))
+            if(e2 < e1):
+                self.changes[i] = 1#need to increase this one
+            self.coefficients[i] -= diff#put it back for further checking
+
+    def get_subtractions(self, testing = False):
+        '''This checks whether we need to decrease each basis set coefficient to promote a decrease in energy. Like get_additions, this won't change the coefficients, just update the changes array for when we make the changes at the end of each step.'''
+        for i in range(self.N):
+            e1 = self.get_energy()
+            diff = 0.05 * self.coefficients[i]
+            self.coefficients[i] -= diff
+            e2 = self.get_energy()
+            if testing and e1 > e2:
+                print("SUBTRACTING:: e1: {}, e2:{}".format(e1,e2))
+            if(e2 < e1):
+                self.changes[i] = -1#need to decrease this one
+            self.coefficients[i] += diff#put it back for further checking
             
 def read_file(filename):
     '''This reads in a file containing the x-axis for our wavefunction.'''

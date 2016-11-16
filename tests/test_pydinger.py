@@ -165,3 +165,112 @@ class TestPydinger(unittest.TestCase):
             assert item - 1.0 < 0.00001
         assert isinstance(energy, float)
         assert energy - e2 < 0.00001
+
+    def test_get_additions_fourier(self):
+        '''This tests one of two main steps in the variational method I employ, for the Fourier basis set. I add 5% of each coefficient's value to it, then check the new energy from that change alone. If the change decreases the energy, we keep it. This change is tracked in a separate array (of zeros, 1s and -1s) the same length as the coefficient vector.'''
+        test_axis = [i/200.0 -1 for i in range(401)]
+        grid = pydinger.Grid(test_axis, True)
+        grid.set_N(50)
+        grid.set_v(1.0)
+        grid.set_c(1.0)
+        grid.coefficients = np.ones(grid.N)
+        grid.get_hmat()
+        grid.get_energy()
+        grid.get_additions(True)
+        original_coeffs = copy.deepcopy(grid.coefficients)
+        changed = False
+        #there will almost certainly be changes
+        for i in range(grid.N):
+            if(grid.changes[i] != 0):
+                changed = True
+        assert changed == True
+        #the values of coefficients should stay the same
+        for i in range(grid.N):
+            assert abs(original_coeffs[i] - grid.coefficients[i]) < 0.00001
+
+    def test_get_additions_legendre(self):
+        '''This tests one of two main steps in the variational method I employ, for the Legendre basis set. I add 5% of each coefficient's value to it, then check the new energy from that change alone. If the change decreases the energy, we keep it. This change is tracked in a separate array (of zeros, 1s and -1s) the same length as the coefficient vector.'''
+        test_axis = [i/200.0 -1 for i in range(401)]
+        grid = pydinger.Grid(test_axis, False)
+        grid.set_N(50)
+        grid.set_v(1.0)
+        grid.set_c(1.0)
+        grid.get_hmat()
+        grid.get_energy()
+        grid.get_additions()
+        original_coeffs = copy.deepcopy(grid.coefficients)
+        changed = False
+        #there will almost certainly be some changes
+        for i in range(grid.N):
+            if(grid.changes[i] != 0):
+                changed = True            
+        assert changed == True
+        #the values of coefficients should stay the same
+        for i in range(grid.N):
+            assert abs(original_coeffs[i] - grid.coefficients[i]) < 0.00001
+
+    def test_get_subtractions_fourier(self):
+        '''This tests one of two main steps in the variational method I employ, for the Fourier basis set. I subtract 5% of each coefficient's value from it, then check the new energy from that change alone. If the change decreases the energy, we keep it. This change is tracked in a separate array (of zeros, 1s and -1s) the same length as the coefficient vector.'''
+        test_axis = [i/200.0 -1 for i in range(401)]
+        grid = pydinger.Grid(test_axis, True)
+        grid.set_N(50)
+        grid.set_v(1.0)
+        grid.set_c(1.0)
+        grid.get_hmat()
+        grid.get_energy()#this is to get some coefficients...
+        original_coeffs = copy.deepcopy(grid.coefficients)
+        grid.get_subtractions(True)
+        changed = False
+        #there will certainly be some changes
+        for i in range(grid.N):
+            if(grid.changes[i] == -1):
+                changed = True            
+        assert changed == True
+        #the values of coefficients should stay the same
+        for i in range(grid.N):
+            assert abs(original_coeffs[i] - grid.coefficients[i]) < 0.00001
+
+    def test_get_subtractions_legendre(self):
+        '''This tests one of two main steps in the variational method I employ, for the Legendre basis set. I subtract 5% of each coefficient's value from it, then check the new energy from that change alone. If the change decreases the energy, we keep it. This change is tracked in a separate array (of zeros, 1s and -1s) the same length as the coefficient vector.'''
+        test_axis = [i/200.0 -1 for i in range(401)]
+        grid = pydinger.Grid(test_axis, False)
+        grid.set_N(50)
+        grid.set_v(1.0)
+        grid.set_c(1.0)
+        grid.get_hmat()
+        grid.get_energy()#this is to get some coefficients...
+        original_coeffs = copy.deepcopy(grid.coefficients)
+        grid.get_subtractions(True)
+        changed = False
+        #there will certainly be some changes
+        for i in range(grid.N):
+            if(grid.changes[i] == -1):
+                changed = True            
+        assert changed == True
+        #the values of coefficients should stay the same
+        for i in range(grid.N):
+            assert abs(original_coeffs[i] - grid.coefficients[i]) < 0.00001
+
+    def test_get_both(self):
+        '''This is a sanity check to make sure that I'm not scheduling and addition AND subtraction for any given coefficient.'''
+        test_axis = [i/200.0 -1 for i in range(401)]
+        grid = pydinger.Grid(test_axis, False)
+        grid.set_N(50)
+        grid.set_v(1.0)
+        grid.set_c(1.0)
+        grid.get_hmat()
+        grid.get_energy()#this is to get some coefficients...
+        original_coeffs = copy.deepcopy(grid.coefficients)
+        grid.get_subtractions()
+        sub_array = copy.deepcopy(grid.changes)
+        grid.get_additions()
+        add_array = grid.changes
+        for i in range(grid.N):
+            if(sub_array[i] == -1):
+                #make sure that we keep all the subtractions we noted
+                assert(add_array[i] == -1)
+            if(sub_array[i] == 0):
+                #make sure that we either kept a 0 or added a 1
+                assert(add_array[i] == 0 or add_array[i] == 1)
+                    
+        
