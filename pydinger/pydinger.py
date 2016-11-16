@@ -11,7 +11,6 @@ class Grid:
         self.fourier = True#use Fourier series by default
         self.N = 50#a fairly accurate number
         self.period = abs(self.axis[0] - self.axis[len(self.axis)-1])#treat as if it's periodic
-        self.offset = self.axis[0]#the offset for plotting to use
         self.hmat = []
         self.wavefunc = []
 

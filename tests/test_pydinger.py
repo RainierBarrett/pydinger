@@ -35,10 +35,9 @@ class TestPydinger(unittest.TestCase):
         testfile = '1D_test.txt'
         potentials = pydinger.read_file(testfile)
         assert len(potentials.axis) == 200
-        assert potentials.axis[0] - 0.000100 < 0.000001
-        assert potentials.axis[199] - 1.990000 < 0.000001
+        assert potentials.axis[0] + 0.9999 < 0.000001
+        assert potentials.axis[199] - 0.99 < 0.000001
         assert potentials.period - 2.0  < 0.000001
-        assert potentials.offset - 0.000100  < 0.000001
 
     def test_read_input(self):
         '''This tests to make sure we can read an input file and fetch the appropriate potential file to go with it.'''
@@ -46,8 +45,8 @@ class TestPydinger(unittest.TestCase):
         potentials = pydinger.read_input(testfile)
         #check that we read the potentials OK
         assert len(potentials.axis) == 200
-        assert potentials.axis[0] - 0.000100 < 0.000001
-        assert potentials.axis[199] - 1.990000 < 0.000001
+        assert potentials.axis[0] + 0.9999 < 0.000001
+        assert potentials.axis[199] - 0.99 < 0.000001
         #print(potentials.values[0])
         #check that we have the right values for our constants
         assert potentials.c - 1.0 < 0.000001
@@ -59,8 +58,8 @@ class TestPydinger(unittest.TestCase):
         testfile = 'legendre_test_input.txt'
         potentials = pydinger.read_input(testfile)
         assert len(potentials.axis) == 200
-        assert potentials.axis[0] - 0.000100 < 0.000001
-        assert potentials.axis[199] - 1.990000 < 0.000001
+        assert potentials.axis[0] + 0.9999 < 0.000001
+        assert potentials.axis[199] - 0.99 < 0.000001
         #check that we have the right values for our constants
         assert potentials.c - 1.5 < 0.000001
         assert potentials.N == 10
@@ -74,7 +73,7 @@ class TestPydinger(unittest.TestCase):
         testfile = 'fourier_test_input.txt'
         potentials = pydinger.read_input(testfile)
         #this is a nice-looking, well-behaved (easy to converge upon) function for a fourier series
-        test_wavefunc = potentials.axis*2 + potentials.axis**2 - potentials.axis**3
+        test_wavefunc = potentials.axis**4 - potentials.axis**2
         potentials.get_coefficients(test_wavefunc)#should calculate the fourier coefficients
         assert len(potentials.coefficients) == potentials.N
         values = potentials.get_values(test_wavefunc)
@@ -87,7 +86,7 @@ class TestPydinger(unittest.TestCase):
         '''This will test if we are able to get the same function as used in the Fourier test by using Legendre polynomials instead, and properly plot from said coefficients. Like the Fourier test, how good this fits is a bit outside the scope of unit testing, but I've looked at the plots here in a Jupyter Notebook and it also works well.'''
         testfile = 'legendre_test_input.txt'
         potentials = pydinger.read_input(testfile)
-        test_wavefunc = potentials.axis*2 + potentials.axis**2 - potentials.axis**3
+        test_wavefunc = potentials.axis**4 - potentials.axis**2
         potentials.get_coefficients(test_wavefunc)
         assert len(potentials.coefficients) == potentials.N
         values = potentials.get_values( test_wavefunc )
@@ -128,7 +127,7 @@ class TestPydinger(unittest.TestCase):
         '''This tests that we can apply the Hamiltonian to a wavefunction with the Legendre polynomial basis set.'''
         testfile = 'legendre_test_input.txt'
         potentials = pydinger.read_input(testfile)
-        x = potentials.axis - 1 #because the input file was from 0 to 2, this will be from -1 to 1
+        x = potentials.axis #because the input file was from 0 to 2, this will be from -1 to 1
         test_wavefunc = x**2 -2*x**3 + 4
         potentials.get_coefficients(test_wavefunc)
         #since the legendre polynomial module in numpy has a built-in method to just GET the second derivative basis set coefficients, I just use that.
