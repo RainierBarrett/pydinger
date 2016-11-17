@@ -179,6 +179,7 @@ class TestPydinger(unittest.TestCase):
         assert len(grid.coefficients) == grid.N
         for item in grid.coefficients:
             assert item - 1.0 < 0.00001
+        print("ENERGY IS {}".format(energy.real))
         assert isinstance(energy, float)
         assert energy - e2 < 0.00001
 

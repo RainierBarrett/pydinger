@@ -111,7 +111,7 @@ class Grid:
         for i in range(2):
             new_coefficients.append(0)
         new_coefficients = np.array(new_coefficients)#what a pain!
-        return(np.array(new_coefficients*(-self.c) + self.v * self.coefficients))
+        return(np.array(new_coefficients*(-self.c) + self.v * self.coefficients * self.period))
         
 
     def apply_H_fourier(self):
@@ -120,15 +120,15 @@ class Grid:
         new_coefficients = np.dot(self.hmat, self.coefficients)
         #due to the way I have stored my hamiltonian matrix, I do the V adding here
         #it's the same as applying the 'actual' hamiltonian matrix
-        return(new_coefficients*(-self.c) + self.v*self.coefficients*2*self.period)
+        return(new_coefficients*(-self.c) + self.v*self.coefficients*self.period)
 
     def get_energy(self):
         '''This uses the current basis set coefficients and result of taking the hamiltonian to calculate the energy of the "wavefunction".'''
         #fill with 1s if we're not fitting a given wavefunction.
         if len(self.coefficients) == 0:
-            self.coefficients = np.ones(self.N)
+            self.coefficients = np.ones(self.N)#assume all 1's as some starting point...
         self.get_hmat()
-        return((np.dot(self.coefficients, self.apply_H()))/np.dot(self.coefficients, self.coefficients))#this is the inner product identity of expectation of the hamiltonian
+        return((np.dot((self.coefficients), self.apply_H()))/np.dot(self.coefficients, self.coefficients))#this is the inner product identity of expectation of the hamiltonian
 
     def get_additions(self):
         '''This checks whether we need to increase each basis set coefficient to promote a decrease in energy. This doesn't actually do the changing of the coefficients, only finds which ones should increase.'''
@@ -170,7 +170,7 @@ class Grid:
                     self.changes[i] = 0
             else:
                 #then our changes were all 0
-                done = true
+                done = True
             
             
 def read_file(filename):
