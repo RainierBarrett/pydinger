@@ -185,5 +185,7 @@ def read_input(filename = 'fourier_test_input.txt'):
             elif('FUNCTION' in line):#no longer needed but keep for posterity
                 func = line.split("'")[1]
                 grid.set_wavefunc(func)
+    if(len(grid.wavefunc) == 0):
+        grid.coefficients = np.ones(grid.N)#if no wavefunction is given, do 1.0 for all coeffs
     return(grid)
             #still will need to edit this later to also take in a wavefunction

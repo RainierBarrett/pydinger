@@ -66,6 +66,22 @@ class TestPydinger(unittest.TestCase):
         assert grid.fourier == False
         for i in range(len(grid.axis)):
             assert (grid.wavefunc[i] - (grid.axis[i]**4 - grid.axis[i]**2) < 0.000001)
+        #now check to make sure we can properly read input that has no function given
+        testfile = 'fourier_no_function_input.txt'
+        grid = pydinger.read_input(testfile)
+        assert len(grid.axis) == 200
+        assert grid.axis[0] + 0.9999 < 0.000001
+        assert grid.axis[199] - 0.99 < 0.000001
+        #print(grid.values[0])
+        #check that we have the right values for our constants
+        print("GRID's CONSTANT IS {}".format(grid.c))
+        assert (grid.c - 1.0) < 0.00001
+        assert grid.N == 100
+        assert grid.v - 2.0 <  0.00001
+        assert grid.fourier == True
+        for item in grid.coefficients:
+            assert (item - 1.0) < 0.00001
+        
 
             
     def test_get_coeffs_fourier(self):
