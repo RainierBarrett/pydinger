@@ -89,6 +89,7 @@ class Grid:
 
     def get_hmat_fourier(self):
         '''This constructs the Hamiltonian matrix for the Fourier basis set. Conveniently diagonal due to the nature of the Fourier series. Should only ever be called once per run.'''
+        self.hmat = []
         for i in range(self.N):
             self.hmat.append([0 for i in range(self.N)])
         for i in range(self.N):
@@ -126,33 +127,51 @@ class Grid:
         #fill with 1s if we're not fitting a given wavefunction.
         if len(self.coefficients) == 0:
             self.coefficients = np.ones(self.N)
+        self.get_hmat()
         return((np.dot(self.coefficients, self.apply_H()))/np.dot(self.coefficients, self.coefficients))#this is the inner product identity of expectation of the hamiltonian
 
-    def get_additions(self, testing = False):
+    def get_additions(self):
         '''This checks whether we need to increase each basis set coefficient to promote a decrease in energy. This doesn't actually do the changing of the coefficients, only finds which ones should increase.'''
+        e1 = self.get_energy()
         for i in range(self.N):
-            e1 = self.get_energy()
             diff = 0.05 * self.coefficients[i]
             self.coefficients[i] += diff
             e2 = self.get_energy()
-            if testing and e1 > e2:
-                print("ADDING:: e1: {}, e2:{}".format(e1,e2))
             if(e2 < e1):
                 self.changes[i] = 1#need to increase this one
             self.coefficients[i] -= diff#put it back for further checking
 
-    def get_subtractions(self, testing = False):
+    def get_subtractions(self):
         '''This checks whether we need to decrease each basis set coefficient to promote a decrease in energy. Like get_additions, this won't change the coefficients, just update the changes array for when we make the changes at the end of each step.'''
+        e1 = self.get_energy()
         for i in range(self.N):
-            e1 = self.get_energy()
             diff = 0.05 * self.coefficients[i]
             self.coefficients[i] -= diff
             e2 = self.get_energy()
-            if testing and e1 > e2:
-                print("SUBTRACTING:: e1: {}, e2:{}".format(e1,e2))
             if(e2 < e1):
                 self.changes[i] = -1#need to decrease this one
             self.coefficients[i] += diff#put it back for further checking
+
+    def do_variation(self, cutoff = 100000):
+        #default cutoff is very many steps, but will ensure program won't go on forever
+        nsteps = 0
+        done = False
+        print("Starting...")
+        while((not done) and (nsteps < cutoff)):
+            self.get_additions()
+            self.get_subtractions()
+#            print("CHANGES IS NOW {}".format(self.changes))
+            nsteps += 1
+            if(-1 in self.changes or 1 in self.changes):
+                for i in range(self.N):
+                    #actually update our coefficients
+                    self.coefficients[i] += 0.05 * self.changes[i] * self.coefficients[i]
+                    #reset the changes array
+                    self.changes[i] = 0
+            else:
+                #then our changes were all 0
+                done = true
+            
             
 def read_file(filename):
     '''This reads in a file containing the x-axis for our wavefunction.'''

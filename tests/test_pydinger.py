@@ -74,9 +74,9 @@ class TestPydinger(unittest.TestCase):
         assert grid.axis[199] - 0.99 < 0.000001
         #print(grid.values[0])
         #check that we have the right values for our constants
-        print("GRID's CONSTANT IS {}".format(grid.c))
+        #print("GRID's CONSTANT IS {}".format(grid.c))
         assert (grid.c - 1.0) < 0.00001
-        assert grid.N == 100
+        assert grid.N == 25
         assert grid.v - 2.0 <  0.00001
         assert grid.fourier == True
         for item in grid.coefficients:
@@ -192,7 +192,7 @@ class TestPydinger(unittest.TestCase):
         grid.coefficients = np.ones(grid.N)
         grid.get_hmat()
         grid.get_energy()
-        grid.get_additions(True)
+        grid.get_additions()
         original_coeffs = copy.deepcopy(grid.coefficients)
         changed = False
         #there will almost certainly be changes
@@ -235,7 +235,7 @@ class TestPydinger(unittest.TestCase):
         grid.get_hmat()
         grid.get_energy()#this is to get some coefficients...
         original_coeffs = copy.deepcopy(grid.coefficients)
-        grid.get_subtractions(True)
+        grid.get_subtractions()
         changed = False
         #there will certainly be some changes
         for i in range(grid.N):
@@ -256,7 +256,7 @@ class TestPydinger(unittest.TestCase):
         grid.get_hmat()
         grid.get_energy()#this is to get some coefficients...
         original_coeffs = copy.deepcopy(grid.coefficients)
-        grid.get_subtractions(True)
+        grid.get_subtractions()
         changed = False
         #there will certainly be some changes
         for i in range(grid.N):
@@ -288,5 +288,14 @@ class TestPydinger(unittest.TestCase):
             if(sub_array[i] == 0):
                 #make sure that we either kept a 0 or added a 1
                 assert(add_array[i] == 0 or add_array[i] == 1)
-                    
-        
+
+    #and now that both of those are working, we just need to test the main loop
+    def test_do_variation(self):
+        '''This tests the main function of the program, actually applying the variations to the coefficients. I also want to make sure it aborts if it hits a cutoff number, so it won't get stuck forever.'''
+        testfile = 'fourier_no_function_input.txt'
+        grid = pydinger.read_input(testfile)
+        original_energy = grid.get_energy()
+        cutoff = 100#give it a large amount of steps for first test
+        grid.do_variation(cutoff = cutoff)
+        final_energy = grid.get_energy()
+        assert original_energy - final_energy > 0.0001 #should have decreased the energy...
